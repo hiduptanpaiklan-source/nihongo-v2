@@ -8195,11 +8195,121 @@ const questions = [
   }
 ];
 
+const HIRAGANA_BASIC_ROWS = [
+  {
+    title:"Hiragana Vokal — A I U E O",
+    label:"Vokal",
+    items:[
+      ["あ","a"],["い","i"],["う","u"],["え","e"],["お","o"]
+    ]
+  },
+  {
+    title:"Hiragana Baris Ka — Ka Ki Ku Ke Ko",
+    label:"Baris Ka",
+    items:[
+      ["か","ka"],["き","ki"],["く","ku"],["け","ke"],["こ","ko"]
+    ]
+  },
+  {
+    title:"Hiragana Baris Sa — Sa Shi Su Se So",
+    label:"Baris Sa",
+    items:[
+      ["さ","sa"],["し","shi"],["す","su"],["せ","se"],["そ","so"]
+    ]
+  },
+  {
+    title:"Hiragana Baris Ta — Ta Chi Tsu Te To",
+    label:"Baris Ta",
+    items:[
+      ["た","ta"],["ち","chi"],["つ","tsu"],["て","te"],["と","to"]
+    ]
+  }
+];
+
+const HIRAGANA_BASIC = HIRAGANA_BASIC_ROWS
+  .flatMap(row => row.items)
+  .map(([kana,romaji]) => ({kana,romaji}));
+
+const HIRAGANA_SHORT_WORDS = [
+  ["すし","sushi"],
+  ["あした","ashita"],
+  ["あさ","asa"],
+  ["いす","isu"],
+  ["した","shita"],
+  ["そと","soto"],
+  ["くつ","kutsu"],
+  ["たこ","tako"],
+  ["あし","ashi"],
+  ["さけ","sake"]
+].map(([kana,romaji]) => ({kana,romaji}));
+
+function hiraganaChoices(items,index,key,offsets){
+  const choices = offsets.map(
+    offset => items[(index + offset) % items.length][key]
+  );
+  choices.splice(index % 4,0,items[index][key]);
+  return choices;
+}
+
+for(let index=questions.length-1; index>=0; index-=1){
+  if(questions[index].t === "Hiragana"){
+    questions.splice(index,1);
+  }
+}
+
+questions.push(...HIRAGANA_BASIC.flatMap((item,index)=>[
+  {
+    id:2001 + (index * 2),
+    t:"Hiragana",
+    q:`Bacaan romaji yang tepat untuk <b>${item.kana}</b> adalah ...`,
+    c:hiraganaChoices(HIRAGANA_BASIC,index,"romaji",[1,6,11]),
+    a:item.romaji,
+    e:`<b>${item.kana}</b> dibaca <b>${item.romaji}</b>.`,
+    source:"Huruf Dasar Hiragana",
+    level:"Dasar"
+  },
+  {
+    id:2002 + (index * 2),
+    t:"Hiragana",
+    q:`Bentuk hiragana yang dibaca <b>${item.romaji}</b> adalah ...`,
+    c:hiraganaChoices(HIRAGANA_BASIC,index,"kana",[1,6,11]),
+    a:item.kana,
+    e:`Bentuk hiragana untuk bacaan <b>${item.romaji}</b> adalah <b>${item.kana}</b>.`,
+    source:"Huruf Dasar Hiragana",
+    level:"Dasar"
+  }
+]));
+
+questions.push(...HIRAGANA_SHORT_WORDS.flatMap((item,index)=>[
+  {
+    id:2101 + (index * 2),
+    t:"Hiragana",
+    q:`Bacaan romaji yang tepat untuk <b>${item.kana}</b> adalah ...`,
+    c:hiraganaChoices(HIRAGANA_SHORT_WORDS,index,"romaji",[1,4,7]),
+    a:item.romaji,
+    e:`<b>${item.kana}</b> dibaca <b>${item.romaji}</b>.`,
+    source:"Kata Pendek Hiragana",
+    level:"Dasar"
+  },
+  {
+    id:2102 + (index * 2),
+    t:"Hiragana",
+    q:`Bentuk hiragana yang dibaca <b>${item.romaji}</b> adalah ...`,
+    c:hiraganaChoices(HIRAGANA_SHORT_WORDS,index,"kana",[1,4,7]),
+    a:item.kana,
+    e:`Bentuk hiragana untuk bacaan <b>${item.romaji}</b> adalah <b>${item.kana}</b>.`,
+    source:"Kata Pendek Hiragana",
+    level:"Dasar"
+  }
+]));
+
+questions.sort((left,right)=>left.id-right.id);
+
 const essays = [
   {
     "title": "Hiragana",
-    "q": "Tuliskan sepuluh huruf hiragana yang telah dipelajari.",
-    "e": "Contoh jawaban: あ, い, う, え, お, か, き, く, け, こ."
+    "q": "Tuliskan dua puluh huruf hiragana dasar dari baris a, ka, sa, dan ta.",
+    "e": "あ, い, う, え, お, か, き, く, け, こ, さ, し, す, せ, そ, た, ち, つ, て, と."
   },
   {
     "title": "Keluarga",
@@ -8251,16 +8361,22 @@ const essays = [
 const essayRubrics = [
   {
     "type": "hiraganaCount",
-    "min": 10,
+    "min": 20,
+    "allowed": [
+      "あ","い","う","え","お",
+      "か","き","く","け","こ",
+      "さ","し","す","せ","そ",
+      "た","ち","つ","て","と"
+    ],
     "modeOptions": [
       [
         "hiragana",
         "Hiragana"
       ]
     ],
-    "note": "Tuliskan sekurang-kurangnya sepuluh huruf hiragana yang berbeda.",
+    "note": "Tuliskan dua puluh huruf dasar dari baris a, ka, sa, dan ta.",
     "placeholders": {
-      "hiragana": "Tuliskan sepuluh huruf hiragana, dipisahkan dengan koma…"
+      "hiragana": "Tuliskan 20 huruf dasar, dipisahkan dengan koma…"
     }
   },
   {
@@ -9878,6 +9994,39 @@ const crossQuizzes = [
   }
 ];
 
+for(let index=crossQuizzes.length-1; index>=0; index-=1){
+  if(crossQuizzes[index].topic === "Hiragana"){
+    crossQuizzes.splice(index,1);
+  }
+}
+
+crossQuizzes.push(...HIRAGANA_BASIC_ROWS.map((row,index)=>({
+  id:222 + index,
+  title:row.title,
+  topic:"Hiragana",
+  leftLabel:"Hiragana",
+  rightLabel:"Bacaan / Romaji",
+  desc:`Cocokkan huruf hiragana ${row.label.toLowerCase()} dengan bacaan romajinya.`,
+  pairs:row.items.map(([term,match])=>({term,match})),
+  right:row.items.map(([,match])=>match).reverse()
+})));
+
+crossQuizzes.push({
+  id:226,
+  title:"Membaca Kata Pendek Hiragana",
+  topic:"Hiragana",
+  leftLabel:"Kata Hiragana",
+  rightLabel:"Bacaan / Romaji",
+  desc:"Cocokkan kata pendek yang tersusun dari huruf hiragana A sampai TO dengan bacaan romajinya.",
+  pairs:HIRAGANA_SHORT_WORDS.map(item=>({
+    term:item.kana,
+    match:item.romaji
+  })),
+  right:HIRAGANA_SHORT_WORDS
+    .map(item=>item.romaji)
+    .reverse()
+});
+
 
 const ESSAY_STORE = "nihongo_essay_progress_v7";
 const XP_STORE = "nihongo_xp_progress_v1";
@@ -10450,15 +10599,23 @@ function evaluateEssay(index, rawAnswer){
 
   if(rubric.type === "hiraganaCount"){
     const chars = answer.match(/[\u3041-\u3096]/g) || [];
-    const unique = [...new Set(chars)];
+    const allowed = Array.isArray(rubric.allowed)
+      ? new Set(rubric.allowed)
+      : null;
+    const unique = [...new Set(
+      allowed ? chars.filter(char => allowed.has(char)) : chars
+    )];
+    const missing = allowed
+      ? [...allowed].filter(char => !unique.includes(char))
+      : [];
     const score = Math.min(100, Math.round((unique.length / rubric.min) * 100));
     return {
       score,
       label:gradeLabel(score),
       feedback: unique.length >= rubric.min
-        ? `Jawaban memuat ${unique.length} huruf hiragana yang berbeda.`
-        : `Jawaban memuat ${unique.length} huruf hiragana yang berbeda. Tambahkan ${rubric.min - unique.length} huruf lagi.`,
-      missing:[]
+        ? `Jawaban memuat seluruh ${unique.length} huruf hiragana dasar yang diminta.`
+        : `Jawaban memuat ${unique.length} dari ${rubric.min} huruf hiragana dasar.`,
+      missing
     };
   }
 
@@ -10792,7 +10949,7 @@ const TOPIC_DESCRIPTIONS = {
   "Angka":"Angka satuan, belasan, puluhan, ratusan, dan angka gabungan.",
   "Ungkapan":"Ungkapan saat makan, pelayanan restoran, dan instruksi sederhana.",
   "Tata Bahasa":"Perbedaan bentuk biasa dan bentuk sopan pada kata kerja, termasuk bentuk sedang, lampau, negatif, dan negatif lampau.",
-  "Hiragana":"Membaca huruf dan kosakata sederhana dalam hiragana."
+  "Hiragana":"Membaca 20 huruf dasar dari baris a sampai ta serta beberapa kata pendek."
 };
 
 function topics(){
@@ -11313,11 +11470,13 @@ function materiHTML(){
           <div class="studyIcon">あ</div>
           <div>
             <h3>Hiragana</h3>
-            <p class="studyDesc">Baca hiragana terlebih dahulu, kemudian periksa cara bacanya pada kolom di sebelah kanan.</p>
+            <p class="studyDesc">Pelajari bacaan 20 huruf dasar pada baris a, ka, sa, dan ta.</p>
           </div>
         </div>
-        ${materialSubsection("Huruf dasar", ["Membaca Huruf Hiragana"])}
-        ${materialSubsection("Membaca kata", ["Membaca Kata Hiragana"])}
+        ${materialSubsection("Baris A — あいうえお", ["Hiragana Vokal — A I U E O"])}
+        ${materialSubsection("Baris Ka — かきくけこ", ["Hiragana Baris Ka — Ka Ki Ku Ke Ko"])}
+        ${materialSubsection("Baris Sa — さしすせそ", ["Hiragana Baris Sa — Sa Shi Su Se So"])}
+        ${materialSubsection("Baris Ta — たちつてと", ["Hiragana Baris Ta — Ta Chi Tsu Te To"])}
         <div class="teacherNote"><b>Cara berlatih:</b> tutup kolom cara baca, baca hiragananya sendiri, lalu periksa jawabanmu.</div>
       </article>
     </div>
