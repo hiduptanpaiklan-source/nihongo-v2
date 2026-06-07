@@ -2548,6 +2548,7 @@ details p {
 }
 
 .checkTopicButton,
+.shuffleTopicButton,
 .resetTopicButton{
   width:100%;
   margin-top:10px;
@@ -10011,20 +10012,33 @@ crossQuizzes.push(...HIRAGANA_BASIC_ROWS.map((row,index)=>({
   right:row.items.map(([,match])=>match).reverse()
 })));
 
-crossQuizzes.push({
-  id:226,
-  title:"Membaca Kata Pendek Hiragana",
-  topic:"Hiragana",
-  leftLabel:"Kata Hiragana",
-  rightLabel:"Bacaan / Romaji",
-  desc:"Cocokkan kata pendek yang tersusun dari huruf hiragana A sampai TO dengan bacaan romajinya.",
-  pairs:HIRAGANA_SHORT_WORDS.map(item=>({
-    term:item.kana,
-    match:item.romaji
-  })),
-  right:HIRAGANA_SHORT_WORDS
-    .map(item=>item.romaji)
-    .reverse()
+[
+  {
+    id:226,
+    title:"Membaca Kata Pendek Hiragana I",
+    words:HIRAGANA_SHORT_WORDS.slice(0,5)
+  },
+  {
+    id:227,
+    title:"Membaca Kata Pendek Hiragana II",
+    words:HIRAGANA_SHORT_WORDS.slice(5,10)
+  }
+].forEach(part=>{
+  crossQuizzes.push({
+    id:part.id,
+    title:part.title,
+    topic:"Hiragana",
+    leftLabel:"Kata Hiragana",
+    rightLabel:"Bacaan / Romaji",
+    desc:"Cocokkan 5 kata pendek yang tersusun dari huruf hiragana A sampai TO dengan bacaan romajinya.",
+    pairs:part.words.map(item=>({
+      term:item.kana,
+      match:item.romaji
+    })),
+    right:part.words
+      .map(item=>item.romaji)
+      .reverse()
+  });
 });
 
 
@@ -10060,6 +10074,7 @@ let state = {
   filter:"Keluarga",
   checked:false,
   answers:{},
+  questionOrders:{},
   history:readStoredJSON(STORE, []),
   matchIndex:0,
   matchSelectedLeft:null,
@@ -10966,7 +10981,21 @@ function topicDescription(topic){
 }
 
 function visibleQuestions(){
-  return questions.filter(question => question.t === state.filter);
+  const list = questions.filter(question => question.t === state.filter);
+  const order = state.questionOrders[state.filter];
+
+  if(!Array.isArray(order) || order.length !== list.length){
+    return list;
+  }
+
+  const questionsById = new Map(
+    list.map(question => [question.id,question])
+  );
+  const ordered = order
+    .map(id => questionsById.get(id))
+    .filter(Boolean);
+
+  return ordered.length === list.length ? ordered : list;
 }
 
 function stats(){
@@ -11200,6 +11229,14 @@ function latihanHTML(s){
           onclick="checkAnswers()"
         >
           Periksa Jawaban
+        </button>
+
+        <button
+          class="btn ghost shuffleTopicButton"
+          onclick="shuffleQuestions()"
+          title="Acak urutan soal pada topik ini"
+        >
+          Acak Soal
         </button>
 
         <button
@@ -11989,6 +12026,34 @@ function resetAnswers(){
 }
 
 function shuffleQuestions(){
+  cancelAutoAdvance();
+  const currentOrder = visibleQuestions();
+
+  if(currentOrder.length < 2){
+    return;
+  }
+
+  const shuffled = [...currentOrder];
+
+  for(let i=shuffled.length-1; i>0; i--){
+    const randomIndex = Math.floor(Math.random() * (i+1));
+    [shuffled[i],shuffled[randomIndex]] = [
+      shuffled[randomIndex],
+      shuffled[i]
+    ];
+  }
+
+  const unchanged = shuffled.every(
+    (question,index) => question.id === currentOrder[index].id
+  );
+
+  if(unchanged){
+    shuffled.push(shuffled.shift());
+  }
+
+  state.questionOrders[state.filter] = shuffled.map(
+    question => question.id
+  );
   state.index = 0;
   render();
 }
