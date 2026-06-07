@@ -2251,7 +2251,7 @@ details p {
 }
 
 
-/* Bahasa materi yang lebih hangat seperti penjelasan guru */
+/* Bahasa materi yang lebih hangat seperti penjelasan sensei */
 .teacherNote{
   padding:12px 14px;
   border-left:5px solid #8b5cf6;
@@ -4143,7 +4143,7 @@ body{
     <form class="studentLoginCard" onsubmit="saveStudentLogin(event)">
       <div class="studentLoginMark">学</div>
       <h2>Masuk sebagai siswa</h2>
-      <p>Isi identitas sebelum mulai. Email, username, jawaban, nilai, dan total XP akan dikirim kepada guru.</p>
+      <p>Isi identitas sebelum mulai. Email, username, jawaban, nilai, dan total XP akan dikirim kepada sensei.</p>
 
       <label class="studentField">
         <span>Username / nama siswa</span>
@@ -4273,7 +4273,7 @@ function submitStudentResult(activity,data){
     totalXP:Math.max(0,Number(state.xp?.total) || 0)
   };
 
-  showSyncStatus("Mengirim hasil kepada guru…");
+  showSyncStatus("Mengirim hasil kepada sensei…");
 
   fetch(SUBMISSION_ENDPOINT,{
     method:"POST",
@@ -4283,7 +4283,7 @@ function submitStudentResult(activity,data){
     keepalive:true
   })
     .then(()=>{
-      showSyncStatus("Hasil berhasil dikirim kepada guru.","success");
+      showSyncStatus("Hasil berhasil dikirim kepada sensei.","success");
     })
     .catch(()=>{
       showSyncStatus(
